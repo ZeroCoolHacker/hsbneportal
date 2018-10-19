@@ -379,6 +379,17 @@ def edit_profile(request):
 
 
 @login_required
+def digital_id(request):
+    """
+    The digital ID view.
+    :param request:
+    :return:
+    """
+
+    return render(request, 'digital_id.html')
+
+
+@login_required
 @admin_required
 def set_state(request, member_id, state):
     """
@@ -512,6 +523,21 @@ def resend_welcome_email(request, member_id):
     else:
         return JsonResponse(
             {"message": "Couldn't email member, unknown error."})
+
+
+@login_required
+@admin_required
+def sync_xero_accounts(request):
+    from .xerohelpers import sync_xero_accounts
+    success = sync_xero_accounts(User.objects.all().prefetch_related())
+    log_user_event(request.user, "Resynced xero accounts.", "profile")
+
+    if success:
+        return JsonResponse({"message": success})
+
+    else:
+        return JsonResponse(
+            {"message": "Couldn't sync xero accounts, unknown error."})
 
 
 @login_required
